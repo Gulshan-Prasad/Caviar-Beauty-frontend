@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -44,10 +45,18 @@ export default function Checkout() {
   const [couponCode, setCouponCode] = useState('');
   const [coupon, setCoupon] = useState(null);
   const [couponError, setCouponError] = useState('');
-  const [savedAddresses, setSavedAddresses] = useState([]);
-  const { items, total, clearCart } = useCartStore();
-  const { user, isAuthenticated } = useAuthStore();
+  const items = useCartStore((s) => s.items);
+  const total = useCartStore((s) => s.total);
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const { data: savedAddresses = [] } = useQuery({
+    queryKey: ['my-addresses'],
+    queryFn: () => api.get('/addresses').then((r) => r.data.addresses || []),
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+  });
   const navigate = useNavigate();
+  const idempotencyKey = useRef(crypto.randomUUID());
   const { register, handleSubmit, formState: { errors }, setValue, getValues } = useForm({
     resolver: zodResolver(schema),
     defaultValues: { country: 'India' },
@@ -60,10 +69,6 @@ export default function Checkout() {
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (items.length === 0) return <Navigate to="/cart" replace />;
-
-  if (savedAddresses.length === 0 && isAuthenticated) {
-    api.get('/addresses').then(r => setSavedAddresses(r.data.addresses || [])).catch(() => {});
-  }
 
   const applyCoupon = async () => {
     if (!couponCode) return;
@@ -107,6 +112,7 @@ export default function Checkout() {
       shippingAddressId: address.id,
       paymentMethod: 'Razorpay',
       couponCode: coupon?.code || undefined,
+      idempotencyKey: idempotencyKey.current,
     });
 
     return order;
@@ -137,7 +143,7 @@ export default function Checkout() {
             razorpayPaymentId: response.razorpay_payment_id,
             signature: response.razorpay_signature,
           });
-          await clearCart();
+          useCartStore.getState().reset();
           trackEcommerceEvent('purchase', {
             items,
             value: grandTotal,

@@ -34,6 +34,10 @@ api.interceptors.request.use((config) => {
 
 let isRefreshing = false;
 let failedQueue = [];
+const refreshExemptPaths = new Set([
+  '/auth/login', '/auth/admin-login', '/auth/register', '/auth/google', '/auth/apple',
+  '/auth/forgot-password', '/auth/reset-password', '/auth/verify-otp', '/auth/resend-otp',
+]);
 
 const processQueue = (error) => {
   failedQueue.forEach(({ resolve, reject }) => {
@@ -51,8 +55,10 @@ api.interceptors.response.use(
   async (error) => {
     rememberCsrfToken(error.response);
     const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/auth/refresh-token') {
+    const requestPath = originalRequest?.url?.split('?')[0];
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry && requestPath !== '/auth/refresh-token' && !refreshExemptPaths.has(requestPath)) {
       if (isRefreshing) {
+        originalRequest._retry = true;
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         }).then(() => api(originalRequest));

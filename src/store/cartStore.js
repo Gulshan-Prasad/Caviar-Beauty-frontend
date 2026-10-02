@@ -3,13 +3,32 @@ import api from '@/utils/api';
 import toast from 'react-hot-toast';
 import { trackEcommerceEvent } from '@/utils/analytics';
 
+let cartFetchPromise;
+let cartFetchGeneration = 0;
+
 export const useCartStore = create((set, get) => ({
   items: [],
   total: 0,
   isOpen: false,
   isLoading: false,
-  fetchCart: async () => {
-    try { const { data } = await api.get('/cart'); set({ items: data.items, total: data.total }); } catch {}
+  reset: () => {
+    cartFetchGeneration += 1;
+    cartFetchPromise = undefined;
+    set({ items: [], total: 0, isOpen: false, isLoading: false });
+  },
+  fetchCart: () => {
+    if (cartFetchPromise) return cartFetchPromise;
+    const generation = cartFetchGeneration;
+    const request = (async () => {
+      try {
+        const { data } = await api.get('/cart');
+        if (generation === cartFetchGeneration) set({ items: data.items, total: data.total });
+      } catch (err) {
+        if (generation === cartFetchGeneration && err.response?.status === 401) set({ items: [], total: 0 });
+      } finally { if (cartFetchPromise === request) cartFetchPromise = undefined; }
+    })();
+    cartFetchPromise = request;
+    return request;
   },
   addItem: async (productId, variantId, quantity = 1) => {
     try {

@@ -22,7 +22,7 @@ export default function AdminDashboard() {
     queryKey: ['admin-stats'],
     queryFn: () => api.get('/users/dashboard').then(r => r.data),
     enabled: user?.role === 'ADMIN',
-    refetchInterval: 15000,
+    refetchInterval: 60000,
   });
 
   if (user?.role !== 'ADMIN') return <Navigate to={user ? '/dashboard' : '/login'} replace />;

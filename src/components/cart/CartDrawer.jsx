@@ -5,7 +5,12 @@ import { useCartStore } from '@/store/cartStore';
 import { formatPrice, getImageUrl } from '@/utils/helpers';
 
 export default function CartDrawer() {
-  const { items, total, isOpen, setCartOpen, updateQuantity, removeItem } = useCartStore();
+  const items = useCartStore((s) => s.items);
+  const total = useCartStore((s) => s.total);
+  const isOpen = useCartStore((s) => s.isOpen);
+  const setCartOpen = useCartStore((s) => s.setCartOpen);
+  const updateQuantity = useCartStore((s) => s.updateQuantity);
+  const removeItem = useCartStore((s) => s.removeItem);
 
   return (
     <AnimatePresence>
@@ -41,7 +46,9 @@ export default function CartDrawer() {
                   </div>
                 ) : (
                   <AnimatePresence initial={false}>
-                    {items.map((item) => (
+                    {items.map((item) => {
+                      const unitPrice = item.variant?.price ?? item.product.discountPrice ?? item.product.basePrice;
+                      return (
                       <motion.div key={item.id} layout exit={{ opacity: 0, x: 24, transition: { duration: 0.2 } }} className="flex space-x-4">
                         <div className="w-20 h-24 bg-caviar-100 dark:bg-caviar-800 flex-shrink-0">
                           <img src={getImageUrl(item.product.images?.[0]?.url || '')} alt={item.product.name} className="w-full h-full object-cover" />
@@ -50,7 +57,8 @@ export default function CartDrawer() {
                           <Link to={`/products/${item.product.slug}`} onClick={() => setCartOpen(false)} className="text-sm font-medium truncate block hover:text-gold-500 transition-colors">
                             {item.product.name}
                           </Link>
-                          <p className="text-xs text-cavitar-400 mt-1">{formatPrice(item.product.discountPrice || item.product.basePrice)}</p>
+                          <p className="text-xs text-cavitar-400 mt-1">{formatPrice(unitPrice)}</p>
+                          {(item.variant?.color || item.variant?.size) && <p className="text-xs text-caviar-400 mt-1">{[item.variant.color, item.variant.size].filter(Boolean).join(' · ')}</p>}
                           <div className="flex items-center space-x-3 mt-3">
                             <button onClick={() => item.quantity > 1 && updateQuantity(item.id, item.quantity - 1)} className="p-1 hover:bg-caviar-100 dark:hover:bg-caviar-800 rounded transition-colors">
                               <FiMinus className="w-3 h-3" />
@@ -65,7 +73,8 @@ export default function CartDrawer() {
                           </div>
                         </div>
                       </motion.div>
-                    ))}
+                      );
+                    })}
                   </AnimatePresence>
                 )}
               </div>

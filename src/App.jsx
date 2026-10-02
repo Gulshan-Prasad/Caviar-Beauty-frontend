@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/authStore';
@@ -55,15 +55,32 @@ const PageLoader = () => (
 
 export default function App() {
   const { pathname } = useLocation();
-  const { checkAuth, isLoading } = useAuthStore();
-  const { isDark } = useThemeStore();
-  const { fetchCart } = useCartStore();
-  const { fetchWishlist } = useWishlistStore();
+  const checkAuth = useAuthStore((s) => s.checkAuth);
+  const isLoading = useAuthStore((s) => s.isLoading);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const authUserId = useAuthStore((s) => s.user?.id);
+  const isDark = useThemeStore((s) => s.isDark);
+  const fetchCart = useCartStore((s) => s.fetchCart);
+  const resetCart = useCartStore((s) => s.reset);
+  const fetchWishlist = useWishlistStore((s) => s.fetchWishlist);
+  const resetWishlist = useWishlistStore((s) => s.reset);
+  const previousAuthUserId = useRef(undefined);
   const [showSplash, setShowSplash] = useState(pathname === '/');
 
   useEffect(() => { checkAuth(); }, []);
   useEffect(() => { if (isDark) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark'); }, [isDark]);
-  useEffect(() => { if (!isLoading) { fetchCart(); fetchWishlist(); } }, [isLoading]);
+  useEffect(() => {
+    if (isLoading) return;
+    if (previousAuthUserId.current !== authUserId) {
+      resetCart();
+      resetWishlist();
+      previousAuthUserId.current = authUserId;
+    }
+    if (isAuthenticated) {
+      fetchCart();
+      fetchWishlist();
+    }
+  }, [isLoading, isAuthenticated, authUserId, fetchCart, fetchWishlist, resetCart, resetWishlist]);
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   useEffect(() => { trackPageView(pathname); }, [pathname]);
 

@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import api from '@/utils/api';
 
+let authCheckPromise;
+
 export const useAuthStore = create((set, get) => ({
   user: null,
   isAuthenticated: false,
@@ -24,11 +26,19 @@ export const useAuthStore = create((set, get) => ({
     try { await api.post('/auth/logout'); } catch {}
     set({ user: null, isAuthenticated: false });
   },
-  checkAuth: async () => {
-    try {
-      const { data } = await api.get('/auth/me');
-      set({ user: data, isAuthenticated: true, isLoading: false });
-    } catch { set({ user: null, isAuthenticated: false, isLoading: false }); }
+  checkAuth: () => {
+    if (authCheckPromise) return authCheckPromise;
+    authCheckPromise = (async () => {
+      try {
+        const { data } = await api.get('/auth/me');
+        set({ user: data, isAuthenticated: true, isLoading: false });
+      } catch {
+        set({ user: null, isAuthenticated: false, isLoading: false });
+      } finally {
+        authCheckPromise = undefined;
+      }
+    })();
+    return authCheckPromise;
   },
   setUser: (user) => set({ user, isAuthenticated: !!user }),
   updateProfile: async (data) => {

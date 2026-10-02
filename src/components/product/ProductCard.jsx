@@ -7,8 +7,9 @@ import { formatPrice, calculateDiscount, getImageUrl } from '@/utils/helpers';
 import { trackEvent, toGaItems } from '@/utils/analytics';
 
 export default function ProductCard({ product, listName = 'products', index = -1 }) {
-  const { isInWishlist, toggleItem } = useWishlistStore();
-  const { addItem } = useCartStore();
+  const isInWishlist = useWishlistStore((s) => s.items.includes(product.id));
+  const toggleItem = useWishlistStore((s) => s.toggleItem);
+  const addItem = useCartStore((s) => s.addItem);
   const discount = calculateDiscount(product.basePrice, product.discountPrice);
   const primaryImage = product.images?.[0]?.url;
 
@@ -70,11 +71,11 @@ export default function ProductCard({ product, listName = 'products', index = -1
         <button
           onClick={(e) => { e.preventDefault(); toggleItem(product.id); }}
           className={`w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-caviar-800 shadow-lg transition-colors ${
-            isInWishlist(product.id) ? 'text-red-500' : 'text-caviar-600 dark:text-caviar-300 hover:text-red-500'
+            isInWishlist ? 'text-red-500' : 'text-caviar-600 dark:text-caviar-300 hover:text-red-500'
           }`}
           aria-label="Toggle wishlist"
         >
-          <FiHeart className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+          <FiHeart className={`w-4 h-4 ${isInWishlist ? 'fill-current' : ''}`} />
         </button>
         <button
           onClick={(e) => { e.preventDefault(); addItem(product.id); }}

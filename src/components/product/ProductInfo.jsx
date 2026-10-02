@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiHeart, FiShare2, FiStar, FiMinus, FiPlus } from 'react-icons/fi';
 import { useWishlistStore } from '@/store/wishlistStore';
@@ -9,8 +9,14 @@ import toast from 'react-hot-toast';
 export default function ProductInfo({ product }) {
   const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0] || null);
   const [quantity, setQuantity] = useState(1);
-  const { isInWishlist, toggleItem } = useWishlistStore();
-  const { addItem } = useCartStore();
+  const isInWishlist = useWishlistStore((s) => s.items.includes(product.id));
+  const toggleItem = useWishlistStore((s) => s.toggleItem);
+  const addItem = useCartStore((s) => s.addItem);
+
+  useEffect(() => {
+    setSelectedVariant(product.variants?.[0] || null);
+    setQuantity(1);
+  }, [product.id, product.variants]);
 
   const discount = calculateDiscount(product.basePrice, product.discountPrice);
   const avgRating = product.reviews?.length
@@ -19,6 +25,8 @@ export default function ProductInfo({ product }) {
 
   const colors = [...new Set(product.variants?.map((v) => v.color).filter(Boolean))];
   const sizes = [...new Set(product.variants?.map((v) => v.size).filter(Boolean))];
+  const variantHasPrice = selectedVariant?.price != null;
+  const displayPrice = selectedVariant?.price ?? product.discountPrice ?? product.basePrice;
 
   let specifications = {};
   if (product.specifications) {
@@ -53,7 +61,9 @@ export default function ProductInfo({ product }) {
       </div>
 
       <div className="flex items-baseline space-x-3">
-        {product.discountPrice ? (
+        {variantHasPrice ? (
+          <span className="text-2xl md:text-3xl font-medium">{formatPrice(displayPrice)}</span>
+        ) : product.discountPrice ? (
           <>
             <span className="text-2xl md:text-3xl font-medium">{formatPrice(product.discountPrice)}</span>
             <span className="text-lg text-caviar-400 line-through">{formatPrice(product.basePrice)}</span>
@@ -80,7 +90,7 @@ export default function ProductInfo({ product }) {
             {colors.map((color) => (
               <button
                 key={color}
-                onClick={() => setSelectedVariant(product.variants.find((v) => v.color === color) || selectedVariant)}
+                onClick={() => setSelectedVariant(product.variants.find((v) => v.color === color && (!selectedVariant?.size || v.size === selectedVariant.size)) || product.variants.find((v) => v.color === color) || selectedVariant)}
                 className={`px-6 py-2 text-sm border transition-all duration-300 ${
                   selectedVariant?.color === color
                     ? 'border-caviar-950 dark:border-white bg-caviar-950 dark:bg-white text-white dark:text-caviar-950'
@@ -101,7 +111,7 @@ export default function ProductInfo({ product }) {
             {sizes.map((size) => (
               <button
                 key={size}
-                onClick={() => setSelectedVariant(product.variants.find((v) => v.size === size) || selectedVariant)}
+                onClick={() => setSelectedVariant(product.variants.find((v) => v.size === size && (!selectedVariant?.color || v.color === selectedVariant.color)) || product.variants.find((v) => v.size === size) || selectedVariant)}
                 className={`w-14 h-14 flex items-center justify-center text-sm border transition-all duration-300 ${
                   selectedVariant?.size === size
                     ? 'border-caviar-950 dark:border-white bg-caviar-950 dark:bg-white text-white dark:text-caviar-950'
@@ -148,11 +158,11 @@ export default function ProductInfo({ product }) {
         <button
           onClick={() => toggleItem(product.id)}
           className={`btn-secondary flex-1 text-xs flex items-center justify-center space-x-2 ${
-            isInWishlist(product.id) ? 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white' : ''
+            isInWishlist ? 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white' : ''
           }`}
         >
-          <FiHeart className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
-          <span>{isInWishlist(product.id) ? 'In Wishlist' : 'Add to Wishlist'}</span>
+          <FiHeart className={`w-4 h-4 ${isInWishlist ? 'fill-current' : ''}`} />
+          <span>{isInWishlist ? 'In Wishlist' : 'Add to Wishlist'}</span>
         </button>
       </div>
 

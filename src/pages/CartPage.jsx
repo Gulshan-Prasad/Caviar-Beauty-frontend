@@ -6,7 +6,10 @@ import { formatPrice, getImageUrl } from '@/utils/helpers';
 import PageTransition from '@/components/layout/PageTransition';
 
 export default function CartPage() {
-  const { items, total, updateQuantity, removeItem } = useCartStore();
+  const items = useCartStore((s) => s.items);
+  const total = useCartStore((s) => s.total);
+  const updateQuantity = useCartStore((s) => s.updateQuantity);
+  const removeItem = useCartStore((s) => s.removeItem);
 
   const shippingCost = total > 5000 ? 0 : 99;
   const tax = total * 0.18;
@@ -30,14 +33,17 @@ export default function CartPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
               <div className="lg:col-span-2 space-y-6">
                 <AnimatePresence initial={false}>
-                {items.map((item) => (
+                {items.map((item) => {
+                  const unitPrice = item.variant?.price ?? item.product.discountPrice ?? item.product.basePrice;
+                  return (
                   <motion.div key={item.id} layout exit={{ opacity: 0, x: 24, transition: { duration: 0.2 } }} className="flex space-x-6 p-6 border border-caviar-200 dark:border-caviar-800">
                       <div className="w-24 h-32 bg-caviar-100 dark:bg-caviar-800 flex-shrink-0">
                           <img src={getImageUrl(item.product.images?.[0]?.url || '')} alt={item.product.name} className="w-full h-full object-cover" />
                         </div>
                     <div className="flex-1">
                       <Link to={`/products/${item.product.slug}`} className="font-medium hover:text-gold-500 transition-colors">{item.product.name}</Link>
-                      <p className="text-sm text-caviar-500 mt-1">{formatPrice(item.product.discountPrice || item.product.basePrice)}</p>
+                      <p className="text-sm text-caviar-500 mt-1">{formatPrice(unitPrice)}</p>
+                      {(item.variant?.color || item.variant?.size) && <p className="text-xs text-caviar-400 mt-1">{[item.variant.color, item.variant.size].filter(Boolean).join(' · ')}</p>}
                       <div className="flex items-center space-x-4 mt-4">
                         <div className="flex items-center border border-caviar-300 dark:border-caviar-600">
                           <button onClick={() => item.quantity > 1 && updateQuantity(item.id, item.quantity - 1)} className="p-2 hover:bg-caviar-50 dark:hover:bg-caviar-800"><FiMinus className="w-3 h-3" /></button>
@@ -47,9 +53,10 @@ export default function CartPage() {
                         <button onClick={() => removeItem(item.id)} className="text-caviar-400 hover:text-red-500 transition-colors"><FiTrash2 className="w-4 h-4" /></button>
                       </div>
                     </div>
-                    <p className="text-sm font-medium">{formatPrice((item.product.discountPrice || item.product.basePrice) * item.quantity)}</p>
+                    <p className="text-sm font-medium">{formatPrice(unitPrice * item.quantity)}</p>
                   </motion.div>
-                ))}
+                  );
+                })}
                 </AnimatePresence>
               </div>
 

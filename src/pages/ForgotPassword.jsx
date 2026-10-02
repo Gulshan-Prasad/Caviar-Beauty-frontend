@@ -33,7 +33,7 @@ export default function ForgotPassword() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/auth/verify-otp', { email, otp });
+      await api.post('/auth/verify-otp', { email, otp, purpose: 'password-reset' });
       toast.success('Code verified');
       setStep(3);
     } catch (err) {
