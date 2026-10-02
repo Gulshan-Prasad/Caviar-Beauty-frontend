@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root { color-scheme: light; }
+  .dark { color-scheme: dark; }
+  * { @apply border-caviar-200 dark:border-caviar-700; }
+  body { @apply bg-white text-caviar-950 dark:bg-caviar-950 dark:text-caviar-50 font-sans transition-colors duration-300; }
+  ::selection { @apply bg-gold-500/20 text-gold-800 dark:text-gold-200; }
+  ::-webkit-scrollbar { @apply w-1.5; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-caviar-300 dark:bg-caviar-600 rounded-full; }
+}
+
+@layer components {
+  .glass { @apply bg-white/70 dark:bg-caviar-950/70 backdrop-blur-xl border border-white/20 dark:border-caviar-700/30; }
+  .glass-solid { @apply bg-white/90 dark:bg-caviar-950/90 backdrop-blur-xl; }
+  .btn-primary { @apply relative inline-flex items-center justify-center px-8 py-3.5 bg-caviar-950 text-white dark:bg-white dark:text-caviar-950 font-medium text-sm tracking-widest uppercase overflow-hidden transition-all duration-500 hover:bg-caviar-800 dark:hover:bg-caviar-100 focus:outline-none focus:ring-2 focus:ring-gold-500/50; }
+  .btn-secondary { @apply relative inline-flex items-center justify-center px-8 py-3.5 border border-caviar-950 dark:border-white text-caviar-950 dark:text-white font-medium text-sm tracking-widest uppercase transition-all duration-500 hover:bg-caviar-950 hover:text-white dark:hover:bg-white dark:hover:text-caviar-950 focus:outline-none focus:ring-2 focus:ring-gold-500/50; }
+  .btn-gold { @apply relative inline-flex items-center justify-center px-8 py-3.5 bg-gold-500 text-white font-medium text-sm tracking-widest uppercase overflow-hidden transition-all duration-500 hover:bg-gold-600 focus:outline-none focus:ring-2 focus:ring-gold-500/50; }
+  .link-hover { @apply relative inline-block after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full; }
+  .card { @apply bg-white dark:bg-caviar-900 border border-caviar-100 dark:border-caviar-800 rounded-sm transition-all duration-500 hover:shadow-xl dark:hover:shadow-2xl dark:hover:shadow-black/20; }
+  .input-field { @apply w-full px-4 py-3 bg-transparent border border-caviar-300 dark:border-caviar-600 text-caviar-950 dark:text-caviar-50 placeholder:text-caviar-400 dark:placeholder:text-caviar-500 focus:outline-none focus:border-gold-500 dark:focus:border-gold-400 transition-colors duration-300; }
+  select.input-field { @apply bg-white dark:bg-caviar-900 cursor-pointer; }
+  select option { @apply text-caviar-950 dark:text-caviar-50 bg-white dark:bg-caviar-900; }
+  .section-title { @apply font-serif text-3xl md:text-4xl lg:text-5xl font-medium tracking-tight; }
+  .section-subtitle { @apply text-sm md:text-base text-caviar-500 dark:text-caviar-400 tracking-widest uppercase font-medium; }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .perspective-1000 { perspective: 1000px; }
+  .preserve-3d { transform-style: preserve-3d; }
+  .backface-hidden { backface-visibility: hidden; }
+  .rotate-y-180 { transform: rotateY(180deg); }
+}

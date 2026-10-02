@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  
+    <defs>
+      <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+        <circle cx="10" cy="10" r="0.5" fill="#d4af37" opacity="0.15"/>
+      </pattern>
+    </defs>
+    <rect width="800" height="1000" fill="#8B7355"/>
+    <rect width="800" height="1000" fill="url(#dots)"/>
+    <line x1="40" y1="60" x2="200" y2="60" stroke="#d4af37" stroke-width="1" opacity="0.5"/>
+    <text x="400" y="200" text-anchor="middle" font-family="Georgia, serif" font-size="14" fill="#d4af37" opacity="0.6" letter-spacing="4">CAVIAR BEAUTY</text>
+    <g transform="translate(400, 480)" stroke="#d4af37" fill="none" stroke-width="1.5" opacity="0.8">
+      <path d="M-60,-80 L60,-80 L80,60 L-80,60 Z"/>
+      <path d="M-30,-80 L0,-140 L30,-80" stroke-width="1.2"/>
+      <circle cx="0" cy="-20" r="8" fill="#d4af37" opacity="0.3"/>
+    </g>
+    <text x="400" y="680" text-anchor="middle" font-family="Georgia, serif" font-size="28" fill="#ffffff" opacity="0.9">Signature Leather Tote</text>
+    <text x="400" y="720" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" opacity="0.4" letter-spacing="3">LUXURY COLLECTION</text>
+    <line x1="350" y1="760" x2="450" y2="760" stroke="#d4af37" stroke-width="1"/>
+    <line x1="40" y1="940" x2="760" y2="940" stroke="#ffffff" opacity="0.1" stroke-width="1"/>
+  
+</svg>
